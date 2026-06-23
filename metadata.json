@@ -1,0 +1,11 @@
+{
+  "name": "Remix: Enfermería PAE - Proyecto Vivo v21.0",
+  "description": "Una plataforma simulada de alto rendimiento para estudiantes de enfermería, incluyendo gestión de patologías, cálculos clínicos y asistente de triaje con IA.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

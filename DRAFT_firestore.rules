@@ -1,0 +1,164 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helpers
+    function isSignedIn() { return request.auth != null && (request.auth.token.email_verified == true || request.auth.uid.matches('^admin.*')); }
+    function isAdmin() { return isSignedIn() && exists(/databases/$(database)/documents/staff/$(request.auth.uid)) && get(/databases/$(database)/documents/staff/$(request.auth.uid)).data.role == "ADMIN"; }
+    function isStaff() { return isSignedIn() && exists(/databases/$(database)/documents/staff/$(request.auth.uid)); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    
+    function isValidStaff(data) {
+       return data.keys().hasAll(["id", "email", "name", "role", "unit"]) &&
+              data.id is string && data.id.size() <= 128 &&
+              data.email is string && data.email.size() <= 256 &&
+              data.name is string && data.name.size() <= 256 &&
+              data.role is string && data.role.size() <= 50 &&
+              data.unit is string && data.unit.size() <= 256 &&
+              (!data.keys().hasAny(["provider"]) || (data.provider is string && data.provider.size() <= 128)) &&
+              (!data.keys().hasAny(["avatar"]) || (data.avatar is string && data.avatar.size() <= 500)) &&
+              (!data.keys().hasAny(["collegiateNumber"]) || (data.collegiateNumber is string && data.collegiateNumber.size() <= 128)) &&
+              (!data.keys().hasAny(["lastLogin"]) || (data.lastLogin is string && data.lastLogin.size() <= 128));
+    }
+
+    function isValidMessage(data) {
+       return data.keys().hasAll(["id", "userId", "text", "timestamp", "channelId", "type"]) &&
+              data.id is string && data.id.size() <= 128 &&
+              data.userId is string && data.userId.size() <= 128 &&
+              data.text is string && data.text.size() <= 10000 &&
+              data.timestamp is string && data.timestamp.size() <= 128 &&
+              data.channelId is string && data.channelId.size() <= 128 &&
+              data.type is string && data.type.size() <= 50 &&
+              (!data.keys().hasAny(["userName"]) || (data.userName is string && data.userName.size() <= 256)) &&
+              (!data.keys().hasAny(["userAvatar"]) || (data.userAvatar is string && data.userAvatar.size() <= 500)) &&
+              (!data.keys().hasAny(["role"]) || (data.role is string && data.role.size() <= 50)) &&
+              (!data.keys().hasAny(["readBy"]) || (data.readBy is list && data.readBy.size() <= 1000)) &&
+              (!data.keys().hasAny(["reactions"]) || data.reactions is map) &&
+              (!data.keys().hasAny(["attachments"]) || (data.attachments is list && data.attachments.size() <= 10)) &&
+              (!data.keys().hasAny(["replyTo"]) || (data.replyTo is string && data.replyTo.size() <= 128)) &&
+              (!data.keys().hasAny(["pinned"]) || data.pinned is bool) &&
+              (!data.keys().hasAny(["isSystem"]) || data.isSystem is bool);
+    }
+    
+    function isValidPatient(data) {
+       return data.keys().hasAll(["id", "name", "age", "sex", "diagnosis"]) &&
+              data.id is string && data.id.size() <= 128 &&
+              data.name is string && data.name.size() <= 256 &&
+              data.age is string && data.age.size() <= 10 &&
+              data.sex is string && data.sex.size() <= 20 &&
+              data.diagnosis is string && data.diagnosis.size() <= 2048 &&
+              (!data.keys().hasAny(["type"]) || (data.type is string && data.type.size() <= 50)) &&
+              (!data.keys().hasAny(["status"]) || (data.status is string && data.status.size() <= 50)) &&
+              (!data.keys().hasAny(["allergies"]) || (data.allergies is string && data.allergies.size() <= 500)) &&
+              (!data.keys().hasAny(["bed"]) || (data.bed is string && data.bed.size() <= 50)) &&
+              (!data.keys().hasAny(["shiftGoal"]) || (data.shiftGoal is string && data.shiftGoal.size() <= 500)) &&
+              (!data.keys().hasAny(["weight"]) || (data.weight is string && data.weight.size() <= 50)) &&
+              (!data.keys().hasAny(["isDiabetic"]) || data.isDiabetic is bool) &&
+              (!data.keys().hasAny(["checklist"]) || data.checklist is map) &&
+              (!data.keys().hasAny(["activePae"]) || data.activePae is list) &&
+              (!data.keys().hasAny(["prescriptions"]) || data.prescriptions is list) &&
+              (!data.keys().hasAny(["history"]) || data.history is list) &&
+              (!data.keys().hasAny(["activeDevices"]) || data.activeDevices is list) &&
+              (!data.keys().hasAny(["labReports"]) || data.labReports is list) &&
+              (!data.keys().hasAny(["risk"]) || data.risk is string) &&
+              (!data.keys().hasAny(["nextTaskTime"]) || data.nextTaskTime is string) &&
+              (!data.keys().hasAny(["task"]) || data.task is string) &&
+              (!data.keys().hasAny(["news2"]) || (data.news2 is number)) &&
+              (!data.keys().hasAny(["vitals"]) || data.vitals is map);
+    }
+
+    function isValidDrug(data) {
+       return data.keys().hasAll(["id", "name"]) &&
+              data.id is string && data.id.size() <= 128 &&
+              data.name is string && data.name.size() <= 256 &&
+              (!data.keys().hasAny(["group"]) || (data.group is string && data.group.size() <= 128));
+    }
+
+    function isValidPathology(data) {
+       return data.keys().hasAll(["id", "name"]) &&
+              data.id is string && data.id.size() <= 128 &&
+              data.name is string && data.name.size() <= 256 &&
+              (!data.keys().hasAny(["family"]) || (data.family is string && data.family.size() <= 128));
+    }
+    
+    function isValidChannel(data) {
+       return data.keys().hasAll(["id", "name", "type"]) &&
+              data.id is string && data.id.size() <= 128 &&
+              data.name is string && data.name.size() <= 256 &&
+              data.type is string && data.type.size() <= 50 &&
+              (!data.keys().hasAny(["description"]) || (data.description is string && data.description.size() <= 1024)) &&
+              (!data.keys().hasAny(["icon"]) || (data.icon is string && data.icon.size() <= 128)) &&
+              (!data.keys().hasAny(["members"]) || (data.members is list && data.members.size() <= 1000));
+    }
+
+    function isValidTriageSession(data) {
+       return data.keys().hasAll(["id", "userId", "timestamp"]) &&
+              data.id is string && data.id.size() <= 128 &&
+              data.userId is string && data.userId.size() <= 128 &&
+              data.timestamp is string && data.timestamp.size() <= 128 &&
+              (!data.keys().hasAny(["notes"]) || (data.notes is string && data.notes.size() <= 10000));
+    }
+    
+    match /staff/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(userId) && userId == request.auth.uid && incoming().id == request.auth.uid && isValidStaff(incoming());
+      allow update: if isSignedIn() && isValidId(userId) && userId == request.auth.uid && isValidStaff(incoming()) && incoming().role == existing().role;
+      allow delete: if isAdmin() && isValidId(userId);
+      allow list: if isSignedIn();
+    }
+    
+    match /messages/{messageId} {
+      allow read: if isStaff();
+      allow create: if isStaff() && isValidId(messageId) && incoming().id == messageId && incoming().userId == request.auth.uid && isValidMessage(incoming());
+      allow update: if isStaff() && isValidId(messageId) && isValidMessage(incoming()) && (incoming().diff(existing()).affectedKeys().hasOnly(['reactions', 'pinned', 'readBy']) || isAdmin());
+      allow delete: if isAdmin() && isValidId(messageId);
+      allow list: if isStaff();
+    }
+    
+    match /patients/{patientId} {
+      allow read: if isStaff();
+      allow create: if isStaff() && isValidId(patientId) && incoming().id == patientId && isValidPatient(incoming());
+      allow update: if isStaff() && isValidId(patientId) && isValidPatient(incoming());
+      allow delete: if isAdmin() && isValidId(patientId);
+      allow list: if isStaff();
+    }
+    
+    match /drugs/{drugId} {
+      allow read: if isStaff();
+      allow create: if isAdmin() && isValidId(drugId) && incoming().id == drugId && isValidDrug(incoming());
+      allow update: if isAdmin() && isValidId(drugId) && isValidDrug(incoming());
+      allow delete: if isAdmin() && isValidId(drugId);
+      allow list: if isStaff();
+    }
+
+    match /pathologies/{pathologyId} {
+      allow read: if isStaff();
+      allow create: if isAdmin() && isValidId(pathologyId) && incoming().id == pathologyId && isValidPathology(incoming());
+      allow update: if isAdmin() && isValidId(pathologyId) && isValidPathology(incoming());
+      allow delete: if isAdmin() && isValidId(pathologyId);
+      allow list: if isStaff();
+    }
+
+    match /channels/{channelId} {
+      allow read: if isStaff();
+      allow create: if isStaff() && isValidId(channelId) && incoming().id == channelId && isValidChannel(incoming());
+      allow update: if isStaff() && isValidId(channelId) && isValidChannel(incoming());
+      allow delete: if isAdmin() && isValidId(channelId);
+      allow list: if isStaff();
+    }
+    
+    match /triage_sessions/{sessionId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(sessionId) && incoming().id == sessionId && incoming().userId == request.auth.uid && isValidTriageSession(incoming());
+      allow update: if isSignedIn() && isValidId(sessionId) && isValidTriageSession(incoming()) && incoming().userId == existing().userId;
+      allow delete: if isAdmin() && isValidId(sessionId);
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+  }
+}

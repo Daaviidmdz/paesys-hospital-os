@@ -1,0 +1,127 @@
+{
+  "entities": {
+    "Staff": {
+      "title": "Staff",
+      "description": "Healthcare professionals",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "email": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string", "enum": ["ADMIN", "NURSE", "DOCTOR"] },
+        "provider": { "type": "string" },
+        "avatar": { "type": "string" },
+        "unit": { "type": "string" },
+        "collegiateNumber": { "type": "string" },
+        "lastLogin": { "type": "string" }
+      },
+      "required": ["id", "email", "name", "role", "unit"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "Chat message",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userAvatar": { "type": "string" },
+        "role": { "type": "string" },
+        "text": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "channelId": { "type": "string" },
+        "type": { "type": "string" },
+        "replyTo": { "type": "string" }
+      },
+      "required": ["id", "userId", "text", "timestamp", "channelId", "type"]
+    },
+    "Patient": {
+      "title": "Patient",
+      "description": "Patient records",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "age": { "type": "string" },
+        "sex": { "type": "string" },
+        "type": { "type": "string" },
+        "status": { "type": "string" },
+        "diagnosis": { "type": "string" }
+      },
+      "required": ["id", "name", "age", "sex", "diagnosis"]
+    },
+    "Drug": {
+      "title": "Drug",
+      "description": "Drug catalog",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" }
+      },
+      "required": ["id", "name"]
+    },
+    "Pathology": {
+      "title": "Pathology",
+      "description": "Pathology catalog",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" }
+      },
+      "required": ["id", "name"]
+    },
+    "Channel": {
+      "title": "Channel",
+      "description": "Chat channels",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["id", "name", "type"]
+    },
+    "TriageSession": {
+      "title": "TriageSession",
+      "description": "AI Triage sessions",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "userId", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/staff/{userId}": {
+      "schema": { "$ref": "#/entities/Staff" },
+      "description": "Staff profiles"
+    },
+    "/messages/{messageId}": {
+      "schema": { "$ref": "#/entities/Message" },
+      "description": "Chat messages"
+    },
+    "/patients/{patientId}": {
+      "schema": { "$ref": "#/entities/Patient" },
+      "description": "Registered patients"
+    },
+    "/drugs/{drugId}": {
+      "schema": { "$ref": "#/entities/Drug" },
+      "description": "Drugs list"
+    },
+    "/pathologies/{pathologyId}": {
+      "schema": { "$ref": "#/entities/Pathology" },
+      "description": "Pathologies list"
+    },
+    "/channels/{channelId}": {
+      "schema": { "$ref": "#/entities/Channel" },
+      "description": "App channels"
+    },
+    "/triage_sessions/{sessionId}": {
+      "schema": { "$ref": "#/entities/TriageSession" },
+      "description": "User triage sessions"
+    }
+  }
+}

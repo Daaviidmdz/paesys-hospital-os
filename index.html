@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Viewport optimizado para App Nativa: Sin zoom, cubre todo el área (Notch) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="icon" href="/pwa-192x192.svg" type="image/svg+xml">
+    
+    <title>Enfermería PAE - Proyecto Vivo v21.0</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="PAESYS - Sistema Avanzado de Soporte Clínico y Planes de Atención de Enfermería (PAE). Evaluaciones, razonamiento fisiopatológico y administración de cuidados.">
+    <meta name="keywords" content="enfermería, PAE, NANDA, NOC, NIC, cuidados de enfermería, clínica, aplicación de enfermería, salud">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="PAESYS - Sistema de Enfermería">
+    <meta property="og:description" content="Sistema Inteligente de Soporte Clínico y Planes de Cuidados (PAE).">
+    <meta property="og:type" content="website">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+      body { 
+        font-family: 'Inter', sans-serif; 
+        background-color: #f8fafc; /* slate-50 */
+        -webkit-tap-highlight-color: transparent; /* Quitar highlight gris al tocar en móvil */
+        overscroll-behavior-y: none; /* Evitar rebote de scroll en toda la página */
+      }
+      
+      /* REGLA DE NEGRITA Y LEGIBILIDAD GLOBAL PARA ENTRADAS DE TEXTO */
+      input, textarea, select {
+        font-weight: 800 !important;
+        letter-spacing: -0.01em;
+        color: #0f172a; /* slate-900 por defecto para legibilidad en fondos claros */
+      }
+
+      .dark input, .dark textarea, .dark select {
+        color: #ffffff !important; /* Blanco puro en modo oscuro */
+      }
+      
+      /* Dark mode body background transition */
+      html.dark body {
+        background-color: #020617; /* slate-950 */
+        color: #f8fafc;
+      }
+
+      /* Custom scrollbar for clinical feel */
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+      ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+      
+      .dark ::-webkit-scrollbar-thumb { background: #475569; }
+      .dark ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+      /* Ocultar scrollbar en elementos específicos pero mantener funcionalidad */
+      .no-scrollbar::-webkit-scrollbar {
+          display: none;
+      }
+      .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+      }
+
+      /* --- MOBILE APP UTILITIES --- */
+      
+      /* Respetar el área segura del iPhone (Notch/Home Indicator) */
+      .safe-area-pb {
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+      .safe-area-pt {
+        padding-top: env(safe-area-inset-top);
+      }
+
+      /* --- ANIMATIONS ENGINE --- */
+      
+      /* Fade In (General) */
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      .animate-fade-in {
+        animation: fadeIn 0.3s ease-out forwards;
+      }
+
+      /* Fade In Up (Cards, Modals) */
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in-up {
+        animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      /* Slide In Bottom (Drawer/Menu) */
+      @keyframes slideInBottom {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
+      }
+      .animate-slide-in-bottom {
+        animation: slideInBottom 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      /* Slide In Top (Notifications) */
+      @keyframes slideInTop {
+        from { transform: translateY(-20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+      .animate-slide-in-top {
+        animation: slideInTop 0.3s ease-out forwards;
+      }
+
+      /* Slide In Right (Navigation / Panels) */
+      @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      .animate-slide-in-right {
+        animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      /* Pulse Slow (Critical Status) */
+      @keyframes pulseSlow {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+      .animate-pulse-slow {
+        animation: pulseSlow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+
+      /* Dash Animation (ECG Wave) */
+      @keyframes dash {
+        to { stroke-dashoffset: -100; }
+      }
+      .animate-dash {
+        stroke-dasharray: 100;
+        stroke-dashoffset: 0;
+        animation: dash 3s linear infinite;
+      }
+
+      /* --- 3D FLIP CARD EFFECT --- */
+      .perspective-1000 {
+        perspective: 1000px;
+      }
+      .transform-style-3d {
+        transform-style: preserve-3d;
+      }
+      .backface-hidden {
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+      }
+      .rotate-y-180 {
+        transform: rotateY(180deg);
+      }
+
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "fuse.js": "https://aistudiocdn.com/fuse.js@^7.0.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
